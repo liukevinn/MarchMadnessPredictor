@@ -1,0 +1,7 @@
+```{r}
+library(tidyverse)
+library(tidymodels)
+twitch <- read.csv("twitchdata-update.csv")
+```
+
+

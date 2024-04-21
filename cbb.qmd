@@ -1,0 +1,12 @@
+---
+title: "Stat210 Final Project"
+author: "Kevin Liu & Evan Zhong"
+format: pdf
+---
+```{r read-data}
+library(tidyverse)
+library(tidymodels)
+cbb <- read.csv("cbb.csv")
+```
+
+

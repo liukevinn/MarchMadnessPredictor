@@ -5,8 +5,20 @@ format: pdf
 ---
 ```{r read-data}
 library(tidyverse)
+library(dplyr)
 library(tidymodels)
+library(MASS)
+library(nnet)
 cbb <- read.csv("cbb.csv")
 ```
+```{r, message = F, warning = F}
+cbbOrdinal <- polr(factor(POSTSEASON) ~ CONF + G + W + ADJOE + ADJDE + BARTHAG + EFG_O + EFG_D + TOR + TORD + ORB + DRB + FTR + FTRD + X2P_O + X2P_D + X3P_O + X3P_D + ADJ_T + WAB + SEED, data = cbb)
+summary(cbbOrdinal)
+```
+```{r, message = F, warning = F}
+cbbLinear <- polr(factor(POSTSEASON) ~ CONF + G + W + ADJOE + ADJDE + BARTHAG + EFG_O + EFG_D + TOR + TORD + ORB + DRB + FTR + FTRD + X2P_O + X2P_D + X3P_O + X3P_D + ADJ_T + WAB + SEED)
+summary(cbbOrdinal)
+```
+
 
 

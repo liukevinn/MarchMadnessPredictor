@@ -54,6 +54,19 @@ augCbbLinear |>
        subtitle = "Is a linear line -- Can assume normality")
  
 ```
+Assumptions needed for the linear model: Independence, Linearity, Constant Variance, and Normal Distribution
+
+1. Independence
+The dataset includes records of NCAA March Madness Tournament team performances (playoff runs) from 2013 to 2021. These observations--tournament runs—are NOT independent. Several factors contribute to this--for example, teams retaining players across seasons, powerhouse teams that show dominance throughout the years, the trading of players between teams and more. Thus, a team's performance in one tournament could influence its performance in future tournaments as well as other teams in the current tournament. Therefore, the assumption of independence is not met.
+
+2. Linearity
+  Linearity is not satisfied because the residuals are not symmetrically distributed along y = 0. The data points follow several very strong negative trends. This could be for many reasons, most likely because there are interaction effects. All in all though, the residual plot is not symmetric and therefore does not satisfy linearity.
+  
+3. Constant Variance
+  Constant variance is not satisfied because the data set is not consistent/spreadout across all the predicted values. Although there is no signicant clumps, there are clear trends. Based on these features, we can conclude that the variance is not independent from the predictors
+
+4. Normal Distribution
+  Because the QQ plot follows the linear line, therefore we cannot assume normality.
 
 
 

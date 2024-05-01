@@ -10,6 +10,7 @@ library(tidymodels)
 library(MASS)
 library(nnet)
 cbb <- read.csv("cbb.csv")
+cbb <- subset(cbb, select = -W)
 cbb <- cbb |> filter(!is.na(POSTSEASON)) |> 
               filter(POSTSEASON != "N/A" & !is.na(POSTSEASON))
 #we only want to use the teams that make the tournament
@@ -17,7 +18,7 @@ cbb <- cbb |> filter(!is.na(POSTSEASON)) |>
 ```
 
 ```{r, message = F, warning = F}
-cbbOrdinal <- polr(factor(POSTSEASON) ~ CONF + G + W + ADJOE + ADJDE + BARTHAG + EFG_O + EFG_D + TOR + TORD + ORB + DRB + FTR + FTRD + X2P_O + X2P_D + X3P_O + X3P_D + ADJ_T + WAB + SEED, data = cbb)
+cbbOrdinal <- polr(factor(POSTSEASON) ~ CONF + G + ADJOE + ADJDE + BARTHAG + EFG_O + EFG_D + TOR + TORD + ORB + DRB + FTR + FTRD + X2P_O + X2P_D + X3P_O + X3P_D + ADJ_T + WAB + SEED, data = cbb)
 summary(cbbOrdinal)
 ```
 ```{r, message = F, warning = F}
@@ -34,7 +35,7 @@ cbbAug <- cbb |>
     TRUE ~ NA_integer_  # Handle any other cases or unexpected values
   ))
 
-cbbLinear <- lm(POSTSEASON ~ CONF + G + W + ADJOE + ADJDE + BARTHAG + EFG_O + EFG_D + TOR + TORD + ORB + DRB + FTR + FTRD + X2P_O + X2P_D + X3P_O + X3P_D + ADJ_T + WAB + SEED, data = cbbAug)
+cbbLinear <- lm(POSTSEASON ~ CONF + G + ADJOE + ADJDE + BARTHAG + EFG_O + EFG_D + TOR + TORD + ORB + DRB + FTR + FTRD + X2P_O + X2P_D + X3P_O + X3P_D + ADJ_T + WAB + SEED, data = cbbAug)
 summary(cbbLinear)
 
 augCbbLinear = augment(cbbLinear)
@@ -67,8 +68,15 @@ The dataset includes records of NCAA March Madness Tournament team performances 
 
 4. Normal Distribution
   Because the QQ plot follows the linear line, therefore we cannot assume normality.
+  
+# Interpretations
+Holding all other variables constant, if a team is in Conference USA we'd expect them to place 17 higher than a team in the West Coast Conference
 
+Holding all other variables constant, then, on average, for every additional point of adjusted offensive efficiency, we'd expect a team to place 2.53446 ranks higher
 
+Holding all other variables constant, then, on average, for every additional point of adjusted defensive efficiency, we'd expect a team to place 3.13359 ranks higher
+
+Hypothesis Test: 
 
 
 

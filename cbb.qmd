@@ -18,9 +18,36 @@ cbb <- cbb |> filter(!is.na(POSTSEASON)) |>
 ```
 
 ```{r, message = F, warning = F}
-cbbOrdinal <- polr(factor(POSTSEASON) ~ CONF + G + ADJOE + ADJDE + BARTHAG + EFG_O + EFG_D + TOR + TORD + ORB + DRB + FTR + FTRD + X2P_O + X2P_D + X3P_O + X3P_D + ADJ_T + WAB + SEED, data = cbb)
+cbb <- cbb |>
+  mutate(POSTSEASON = case_when(
+    POSTSEASON == "R68" ~ 1,
+    POSTSEASON == "R64" ~ 2,
+    POSTSEASON == "R32" ~ 3,
+    POSTSEASON == "S16" ~ 4,
+    POSTSEASON == "E8" ~ 5,
+    POSTSEASON == "F4" ~ 6,
+    POSTSEASON == "2ND" ~ 7,
+    POSTSEASON == "Champions" ~ 8
+  ))
+```
+
+```{r}
+
+cbbOrdinal <- polr(as.factor(POSTSEASON) ~ SEED + G + ADJOE + ADJDE + BARTHAG + EFG_O + EFG_D + TOR + TORD + ORB + DRB + FTR + FTRD + X2P_O + X2P_D + X3P_O + X3P_D + ADJ_T + WAB,  data = cbb)
 summary(cbbOrdinal)
 ```
+
+The coefficient corresponding to 8 seed is -0.22555. This means that when controlling for the other variables, if a team is an 8 seed as opposed to a 1 seed, then they are predicted to have e^-0.22555 (0.798077156) times the odds of making the next round of the NCAA tournament
+
+The coefficient corresponding to adjusted offensive efficiency is 0.26490. This means that when controlling for the other variables, for team with one more adjusted offensive efficiency rating point compared to a team without that extra point, the team with the extra point is predicted to have e^-0.26490 (1.303) times the odds of making the next round of the NCAA tournament
+
+Hypothesis test:
+
+
+
+
+
+
 ```{r, message = F, warning = F}
 cbbAug <- cbb |>
   mutate(POSTSEASON = case_when(
@@ -77,6 +104,10 @@ Holding all other variables constant, then, on average, for every additional poi
 Holding all other variables constant, then, on average, for every additional point of adjusted defensive efficiency, we'd expect a team to place 3.13359 ranks higher
 
 Hypothesis Test: 
+Null Hypothesis, H0: there is not a linear relationship between 2-pt field goal percentage and how far a team makes it in the NCAA tournament.
+Alternative Hypothesis, Ha: there is a linear relationship between 2-pt field goal percentage and how far a team makes it in the NCAA tournament.
+
+Given that there is no relationship between 2-pt field goal percentage and how far a team makes it in the NCAA tournament, the probability of getting a slope of -5.41850 or less is 0.0187. Taking a 0.05 significance level, since the p-value is smaller than alpha (0.0187<0.05), there is convincing and sufficient evidence that there is a linear relationship between 2-pt field goal percentage and how far a team makes it in the NCAA tournament.
 
 
 

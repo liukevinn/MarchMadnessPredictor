@@ -10,7 +10,12 @@ library(tidymodels)
 library(MASS)
 library(nnet)
 cbb <- read.csv("cbb.csv")
+cbb <- cbb |> filter(!is.na(POSTSEASON)) |> 
+              filter(POSTSEASON != "N/A" & !is.na(POSTSEASON))
+#we only want to use the teams that make the tournament
+
 ```
+
 ```{r, message = F, warning = F}
 cbbOrdinal <- polr(factor(POSTSEASON) ~ CONF + G + W + ADJOE + ADJDE + BARTHAG + EFG_O + EFG_D + TOR + TORD + ORB + DRB + FTR + FTRD + X2P_O + X2P_D + X3P_O + X3P_D + ADJ_T + WAB + SEED, data = cbb)
 summary(cbbOrdinal)
@@ -19,6 +24,9 @@ summary(cbbOrdinal)
 cbbLinear <- polr(factor(POSTSEASON) ~ CONF + G + W + ADJOE + ADJDE + BARTHAG + EFG_O + EFG_D + TOR + TORD + ORB + DRB + FTR + FTRD + X2P_O + X2P_D + X3P_O + X3P_D + ADJ_T + WAB + SEED)
 summary(cbbOrdinal)
 ```
+
+
+
 
 
 

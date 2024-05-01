@@ -18,6 +18,17 @@ cbb <- cbb |> filter(!is.na(POSTSEASON)) |>
 ```
 
 ```{r, message = F, warning = F}
+cbbAug <- cbb |>
+  mutate(POSTSEASON = case_when(
+    POSTSEASON == "R68" ~ 68,
+    POSTSEASON == "R64" ~ 64,
+    POSTSEASON == "R32" ~ 32,
+    POSTSEASON == "S16" ~ 16,
+    POSTSEASON == "E8" ~ 8,
+    POSTSEASON == "F4" ~ 4,
+    POSTSEASON == "2ND" ~ 2,
+    POSTSEASON == "Champions" ~ 1
+  ))
 cbb <- cbb |>
   mutate(POSTSEASON = case_when(
     POSTSEASON == "R68" ~ 1,
@@ -41,26 +52,12 @@ The coefficient corresponding to 8 seed is -0.22555. This means that when contro
 
 The coefficient corresponding to adjusted offensive efficiency is 0.26490. This means that when controlling for the other variables, for team with one more adjusted offensive efficiency rating point compared to a team without that extra point, the team with the extra point is predicted to have e^-0.26490 (1.303) times the odds of making the next round of the NCAA tournament
 
-Hypothesis test:
-
 
 
 
 
 
 ```{r, message = F, warning = F}
-cbbAug <- cbb |>
-  mutate(POSTSEASON = case_when(
-    POSTSEASON == "R68" ~ 68,
-    POSTSEASON == "R64" ~ 64,
-    POSTSEASON == "R32" ~ 32,
-    POSTSEASON == "S16" ~ 16,
-    POSTSEASON == "E8" ~ 8,
-    POSTSEASON == "F4" ~ 4,
-    POSTSEASON == "2ND" ~ 2,
-    POSTSEASON == "Champions" ~ 1,
-    TRUE ~ NA_integer_  # Handle any other cases or unexpected values
-  ))
 
 cbbLinear <- lm(POSTSEASON ~ CONF + G + ADJOE + ADJDE + BARTHAG + EFG_O + EFG_D + TOR + TORD + ORB + DRB + FTR + FTRD + X2P_O + X2P_D + X3P_O + X3P_D + ADJ_T + WAB + SEED, data = cbbAug)
 summary(cbbLinear)

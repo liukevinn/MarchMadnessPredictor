@@ -106,6 +106,17 @@ Alternative Hypothesis, Ha: there is a linear relationship between 2-pt field go
 
 Given that there is no relationship between 2-pt field goal percentage and how far a team makes it in the NCAA tournament, the probability of getting a slope of -5.41850 or less is 0.0187. Taking a 0.05 significance level, since the p-value is smaller than alpha (0.0187<0.05), there is convincing and sufficient evidence that there is a linear relationship between 2-pt field goal percentage and how far a team makes it in the NCAA tournament.
 
+```{r}
+cbbNullModel <- polr(factor(POSTSEASON)~ 1, data = cbb, Hess = TRUE)
+logL_model <- logLik(cbbOrdinal)
+logL_null <- logLik(cbbNullModel)
+
+mcfadden_r_squared <- 1 - (as.numeric(logL_model) / as.numeric(logL_null))
+print(mcfadden_r_squared)
+
+```
+Moderate Explanatory Power: A McFadden's R-squared value of about 0.25 suggests that the model has moderate explanatory power. While it's not particularly high (such as values closer to 0.5 or above), it's substantial enough to suggest that the model does provide valuable insights into the relationship between the conference (CONF) and the postseason outcomes (POSTSEASON).
+ˆ
 
 
 

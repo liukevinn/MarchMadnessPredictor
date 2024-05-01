@@ -36,6 +36,23 @@ cbbAug <- cbb |>
 
 cbbLinear <- lm(POSTSEASON ~ CONF + G + W + ADJOE + ADJDE + BARTHAG + EFG_O + EFG_D + TOR + TORD + ORB + DRB + FTR + FTRD + X2P_O + X2P_D + X3P_O + X3P_D + ADJ_T + WAB + SEED, data = cbbAug)
 summary(cbbLinear)
+
+augCbbLinear = augment(cbbLinear)
+
+augCbbLinear |> 
+  ggplot(aes(x = .fitted, y = .resid)) + 
+  geom_point() +
+  geom_hline(yintercept = 0, color = "blue") + 
+  labs(x = "Fitted (Predicted) value", y = "Residuals",
+       title = "Residual Model for Predicting Tournament Success (Multiple Negative Slopes)")
+
+ augCbbLinear |> ggplot(aes(sample = .resid)) + 
+  stat_qq() + 
+  stat_qq_line() + 
+  labs(x = "Theoretical quantiles", y = "Sample quantiles",
+       title = "QQ Plot of Residuals Showing Minimal Deviation For Tournament Success",
+       subtitle = "Is a linear line -- Can assume normality")
+ 
 ```
 
 

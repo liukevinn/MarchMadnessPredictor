@@ -21,9 +21,23 @@ cbbOrdinal <- polr(factor(POSTSEASON) ~ CONF + G + W + ADJOE + ADJDE + BARTHAG +
 summary(cbbOrdinal)
 ```
 ```{r, message = F, warning = F}
-cbbLinear <- polr(factor(POSTSEASON) ~ CONF + G + W + ADJOE + ADJDE + BARTHAG + EFG_O + EFG_D + TOR + TORD + ORB + DRB + FTR + FTRD + X2P_O + X2P_D + X3P_O + X3P_D + ADJ_T + WAB + SEED)
-summary(cbbOrdinal)
+cbbAug <- cbb |>
+  mutate(POSTSEASON = case_when(
+    POSTSEASON == "R68" ~ 68,
+    POSTSEASON == "R64" ~ 64,
+    POSTSEASON == "R32" ~ 32,
+    POSTSEASON == "S16" ~ 16,
+    POSTSEASON == "E8" ~ 8,
+    POSTSEASON == "F4" ~ 4,
+    POSTSEASON == "2ND" ~ 2,
+    POSTSEASON == "Champions" ~ 1,
+    TRUE ~ NA_integer_  # Handle any other cases or unexpected values
+  ))
+
+cbbLinear <- lm(POSTSEASON ~ CONF + G + W + ADJOE + ADJDE + BARTHAG + EFG_O + EFG_D + TOR + TORD + ORB + DRB + FTR + FTRD + X2P_O + X2P_D + X3P_O + X3P_D + ADJ_T + WAB + SEED, data = cbbAug)
+summary(cbbLinear)
 ```
+
 
 
 

@@ -24,7 +24,7 @@ cbbAug <- cbb |>
     POSTSEASON == "R64" ~ 64,
     POSTSEASON == "R32" ~ 32,
     POSTSEASON == "S16" ~ 16,
-    POSTSEASON == "E8" ~ 8,
+    POSTSEASON == "E8" ~ 8, 
     POSTSEASON == "F4" ~ 4,
     POSTSEASON == "2ND" ~ 2,
     POSTSEASON == "Champions" ~ 1

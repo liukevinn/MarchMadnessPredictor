@@ -1,0 +1,216 @@
+---
+title: "Developing Ordinal Regression Model to Predict NCAA Basketball Champions"
+author: Kevin Liu & Evan Zhong
+output: html_document
+date: "2024-05-01"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+<center> <h3>Abstract</h3> </center>
+
+<center><p>NCAA Basketball’s March Madness is one of the most well known and watched sporting events in the US. The event is viewed by millions of viewers from around the world, and over $15 billion are wagered every year on these games. Given the interest of coaches and analysts, fans, and bettors, we wish to determine what metrics are most strongly associated with successful teams, as well as how to develop a predictive model to predict champions. In this paper, we develop an exploratory data analysis of data from the 2013-2023 NCAA basketball seasons, create an ordinal regression model in order to predict postseason outcomes, and discuss the results that we have produced. Overall, we found that 2 point and 3 point defense were the performance metrics that were most strongly associated with championship winning teams. Further, the low power of our model implies it is difficult to develop a predictive model of championship outcomes, and that perhaps we could develop more refined data to improve results.</p> </center>
+
+## Introduction
+
+March Madness, or the postseason NCAA basketball tournament, is arguably one of the greatest postseason events over all sports. Over 10 million people spend the final weeks of March and early April watching collegiate athletes from around the country compete at the highest level. Moreover, $15.5 billion were wagered on these March Madness games in 2023 (Ginsbach, 2023). Thus, understanding the factors that contribute to a team’s success in the tournament is valuable for coaches, bettors, analysts, and basketball enthusiasts alike. In this study, we wish to develop a regression model to better predict the champions of the March Madness Tournament. Specifically, we aim to answer the following research questions:
+
+1. Which performance metrics are most strongly associated with championship-winning teams?
+
+2. Can we build a predictive model to forecast championship outcomes based on team performance metrics?
+
+Hypothesis: We predict that the performance metrics most strongly associated with championship-winning teams include Effective Field Goal percentage, adjusted Offensive Efficiency, and adjusted Defensive Efficiency (these variables are detailed in the Data section). Basketball is ultimately a game of how well a team can successfully put the ball in the basket and prevent the opponents from doing so, and these statistics best reflect this. As for whether we can develop a predictive model, we imagine that it may be difficult due to the volatility of college basketball, however, we believe there will be statistically significant predictors.
+
+## Data
+
+This dataset is from data collected from all NCAA D1 basketball games from 2013 - 2023, and is created by Andrew Sundberg and found on Kaggle. We have linked the dataset here: https://www.kaggle.com/datasets/andrewsundberg/college-basketball-dataset/data.
+
+The data is collected by data analysts for the NCAA, where play-by-play data can be used to calculate all of the following metrics. 
+
+The following is a description of all of the used variables: 
+
+TEAM: which university (not useful information, variable is ignored). 
+
+CONF: which Conference the team belongs to, determines in-conference schedule and overall strength-of-schedule.
+
+G: Games = number of games played.
+
+W: Wins = total wins out of all matches. 
+
+ADJOE: raw offensive efficiency (points per 100 possessions) * national average raw offensive efficiency / opponent team’s adjusted defensive efficiency, essentially describes how strong an offense is when accounting also for the teams they play. $\frac{OEff_{team}*OEff_{avg}}{DEff_{adj}}$ 
+
+ADJDE: raw defensive efficiency (points scored on per 100 possessions) * national average raw defensive efficiency / opponent team’s adjusted offensive efficiency, essentially describes how strong a defense is when accounting also for the teams they play.$\frac{DEff_{team}*DEff_{avg}}{OEff_{adj}}$ 
+
+BARTHAG: Power rating (Chance of beating an average Division 1 team), described as a percentage, calculated by pythagorean expectation formula, $\frac{(points_{scored})^5}{(points_{scored})^5 + (points_{allowed})^5 }$.
+
+EFG_O: Effective Field Goal Percentage = (2-point field goals made + (1.5 * 3-point field goals made)) / field goal attempts as a percentage. $\frac{FG_{2point}+1.5*FG_{3point}}{FG_{attempts}} * 100$
+
+EFG_D: Effective Field Goal Defense, replace made field goals with field goals allowed and opponent attempts. 
+
+TOR: Turnover Rate, turnover is when a team loses possession before a shot, calculated by turnovers / possession.
+
+TORD: What fraction of opponent possessions are ended by a forced turnover. 
+
+ORB: Offensive rebounding percentage is a percentage of offensive rebounds / (offensive rebounds + opponent defensive rebounds). Equivalent to the proportion of rebounds after an offensive possession. $\frac{OFFR}{OFFR + DEFR_{opp}} * 100$
+
+DRB: Defensive Rebound Percentage is percentage of defensive rebounds / (defensive rebounds + opponent offensive rebounds). $\frac{DEFR}{DEFR + OFFR_{opp}} * 100$
+
+FTR: free throw rate = free throw attempts / field goal attempts, essentially what percentage of offensive plays end in free throws.
+FTRD: free throw rate allowed: opponent’s FTR, essentially demonstrates how much a team fouls, could be associated with lack of discipline. 
+
+X2P_O: 2 point shooting percentage, what percent of 2 point attempts are successful. 
+
+X2P_D: 2 point shooting percentage of opponent. 
+
+X3P_O: 3 point shooting percentage, what percent of 3 point attempts are successful. 
+
+X3P_D: 3 point shooting percentage of opponent.
+
+ADJ_T: Adjusted Tempo, Tempo is possessions per 40 min, Adjusted Tempo is an estimate of the tempo a team would have against a team with average tempo.
+
+WAB: Wins Above Bubble, bubble is the term for teams that just make the NCAA tournament, or the last 4 teams that qualify. Wins Above Bubble is calculated by (wins - (average wins of 4 bubble teams). 
+
+POSTSEASON: Result of the postseason, labeled N/A for those who did not make the tournament, R68 for those who lost in the play-in (2 matches before the round of 64), R64 for those who lost in the Round of 64, R32 for those who lost in the Round of 32, S16 for those who lost in the Sweet 16, E8 for those who lost in the Elite 8, F4 for those who lost in the Final 4, 2nd for the runner up, and Champion for the winner of the tournament.
+
+SEED: Seed (Ranking) before the tournament (from 1-16, with 4 teams of every seed).
+
+YEAR: Season, 2013 - 2023, will not be used in our model.
+
+It is also important to understand a few characteristics of the 2013-2023 stretch of College Basketball. Throughout the period, we saw the continued dominance of Blue-Blood basketball programs, with notable champions including Duke, UConn, and North Carolina. Additionally, Villanova had a great showing during this stretch, with 2 championships and 1 Final Four appearance. Multiple teams from the Big10, such as Michigan, Michigan State, and Wisconsin totalled to 6 Final Four placements. We also saw a few “Cinderella” runs during this period, with unlikely teams such as Wichita State and Loyola-Chicago making the Final Four (NCAA, 2023). 
+
+## Previous Literature
+
+It is important to know that these variables we are using are very common amongst most models used to predict results in NCAA basketball and even NBA basketball. For instance, one of the most popular prediction sources, known as the KenPom rankings, uses Adjusted Offensive Efficiency, Adjusted Defensive Efficiency, Adjusted Tempo, etc. to rank all of the teams in the postseason(Pomery, 2024). Thus, using these variables as predictors is not entirely a new concept. However, in general, much of the statistical analysis utilized in the NCAA March Madness bracket is focused on head-to-head matchups or ranking teams, not predicting an actual winner. KenPom rankings simply orders the teams based on a ranking system, rather than predicting a winner. Furthermore, a lot of data used by oddsmakers when it comes to sports betting is used for creating lines in head-to-head games. One of the variables we use, known as Barthag, is a common predictor particularly for probability of victory in head-to-head versus the average team (Torvik, 2024). 
+
+Other researches have also utilized very advanced models to predict March Madness winners. Shen et al. utilized machine-learning models as well as forest data-mining techniques to develop high-accuracy predictive models (Shen et al., 2016). Other studies, such as that of Osken and Onay (Osken and Onay, 2022) as well as Kim et al. also use machine learning models to predict champions (Kim et al., 2023). 
+In this way, we present a rather novel approach to predicting champions, using a relatively simple model that is also effective, as opposed to more complex and machine-learning heavy models. This model also differs from the head-to-head approaches of previous statistical models. 
+
+## Exploratory Analysis
+
+Aside from TEAM and YEAR, we find that the rest of the data is meaningful as predictors. We would like to point out that in general, stronger teams play more games because they can schedule more out-of-conference games, get invites to in-season tournaments, and also play more games depending on their success in the conference tournament. Thus, GAMES can be a meaningful predictor. Further, CONF, or the conference that a team plays in, can determine the strength of a team’s opponents, and thus we find it to be meaningful as well. 
+
+Initially we set up a simple linear regression with all of the predictors besides TEAM and YEAR, and our response variable is the POSTSEASON result. We modify this value to be continuous and not categorical by translating R68 to 68, R64 to 64, R32 to 32 … Champions to 1. We can then interpret the response variable to be the overall rank within the tournament. Therefore, a decrease of x in POSTSEASON represents a decrease in rank, which is closer to becoming a champion. While this system is not great in terms of developing an accurate model, we decided to use it because it is a simple model that helps us see some basic relationships in our data. Because we are attempting to create a model that predicts championship success, we found it reasonable to remove the observations where the team did not qualify for the March Madness bracket. This is also because there is no ranking among the teams that did not make the tournament, and it would be problematic to group all teams that did not make the tournament into one category because of the large disparity between teams in such a category. After removing such observations, we have 680 observations remaining. 
+
+During our exploratory analysis, we noticed that W (wins) and WAB (wins above bubble), in every year, are directly correlated. This is because WABis calculated by subtracting a constant from W. Thus, we find that W and WAB should be collinear, and we should remove one from our predictors. We removed W instead of WAB since WAB is somewhat adjusted for how difficult it was to make the tournament in that particular year, which is beneficial to our model. 
+
+
+
+
+
+
+
+
+The following assumptions are assessed for the linear model: Independence, Linearity, Constant Variance, and Normal Distribution.
+
+1. Independence
+
+The dataset includes records of NCAA March Madness Tournament team performances (playoff runs) from 2013 to 2021. These observations--tournament runs—are NOT independent. Several factors contribute to this--for example, teams retaining players across seasons, powerhouse teams that show dominance throughout the years, the trading of players between teams and more. Thus, a team's performance in one tournament could influence its performance in future tournaments as well as other teams in the current tournament. Therefore, the assumption of independence is not met.
+
+2. Linearity
+
+ 	Linearity is not satisfied because the residuals are not symmetrically distributed along y = 0. The data points follow several very strong negative trends. This could be for many reasons, most likely because there are interaction effects. All in all though, the residual plot is not symmetric and therefore does not satisfy linearity.
+
+3. Constant Variance
+
+Constant variance is not satisfied because the data set is not consistent/spread out across all the predicted values. Although there are no significant clumps, there are clear trends. Based on these features, we can conclude that the variance is not independent from the predictors
+
+4. Normal Distribution
+
+ 	Because the QQ plot follows the linear line, therefore we can assume normality.
+
+While the assumptions for a linear regression model are not satisfied, this model is simply to see roughly the relationships between variables. We include some interpretations to detail some of the relationships in our linear model: 
+
+Holding all other variables constant, if a team is in Conference USA we'd expect them to place 17 higher than a team in the West Coast Conference.
+Holding all other variables constant, then, on average, for every additional point of adjusted offensive efficiency, we'd expect a team to place 2.53446 ranks lower (closer to 1).
+Holding all other variables constant, then, on average, for every additional point of adjusted defensive efficiency, we'd expect a team to place 3.13359 ranks lower (closer to 1).
+Hypothesis Test: 
+Null Hypothesis, H0: there is not a linear relationship between 2-pt field goal percentage and how far a team makes it in the NCAA tournament.
+Alternative Hypothesis, Ha: there is a linear relationship between 2-pt field goal percentage and how far a team makes it in the NCAA tournament.
+
+Given that there is no relationship between 2-pt field goal percentage and how far a team makes it in the NCAA tournament, the probability of getting a slope of -5.41850 or less is 0.0187. Taking a 0.05 significance level, since the p-value is smaller than alpha (0.0187<0.05), there is convincing and sufficient evidence that there is a linear relationship between 2-pt field goal percentage and how far a team makes it in the NCAA tournament.
+ 
+From this, we can see how differences in conference can play a statistically significant role in rank, as well as how other factors such as adjusted offensive efficiency and defensive efficiency are correlated with going further in the tournament. This makes sense in context of our hypothesis: a team that is stronger offensively and defensively would be expected to go further into the tournament. Interestingly, effective field goal percentage for offense and defense (EFG_O and EFG_D) both were not statistically significant due to p-values greater than the alpha of 0.05, which contrasts our initial hypothesis. 
+
+## Methodology
+
+We decided to fit an ordinal regression model in order to best predict postseason results. 
+
+Our research question is focused around developing a predictive model to predict postseason success, and thus it makes most sense to set POSTSEASON as our response or outcome variable. Looking into POSTSEASON closer, we notice that this variable is actually categorical. Teams fall into a category of Round of 68, 64, 32, 16, Elite 8, Final 4, 2nd, or Champion. Thus, with a categorical response variable, we recognize that it is best to use either a multimodal regression model, or an ordinal regression model. To distinguish between the two, we should notice that the rounds do have an inherent order. Champion should be in a higher order than 2nd place, which is higher than the Final Four, etc. Thus, we believe it is best to use an ordinal regression model to answer our research question. 
+
+As for interactions, we did not think interaction variables were valuable for this model. Interaction terms assist in describing how relationships between variables change when controlling for the effects of other variables. For instance, if we were trying to determine the relationship between winning and adjusted defensive efficiency when controlling for conference, we would include an interaction variable. However, given that we are trying to find the champion of the entire March Madness tournament, we do not need to control for a particular relationship that is different between conferences. Even if we find differing relationships based on conference for example, it does not entirely aid in predicting a champion of the entire tournament. Therefore, we do not find interaction variables to be necessary for our predictive model.
+
+As for variable transformations, as mentioned before, we removed all of the data of observations that did not make the March Madness tournament, as they were not entirely important for predicting tournament success. Additionally, we removed the W variable from our model due to collinearity with WAB. Further, because an ordinal logistic model is already logistic in nature, we did not feel the need to log transform our data. 
+
+Lastly, when using an ordinal regression model, proportional odds assumption should be met. We expect this assumption to be roughly satisfied. Holding all other variables constant, when improving in a particular predictor, for example a one unit increase in adjusted offensive efficiency, the effect on the odds ratio between different categories of placement in the tournament should be similar. Even though later rounds should be more difficult, the initial odds of beating these harder teams is also lower, so the impact on the odds ratio of an increase in a particular stat should be similar. An increase in adjusted offensive efficiency for example should not suddenly be much more impactful for an earlier round than a later round. 
+
+## Results
+
+In answering our research questions, we wish to understand which predictors have the greatest impact on our outcome variable, POSTSEASON. 
+
+First we examine the impact of SEED. Some data we understand to be reasonable: For instance, the coefficient corresponding to the 8 seed is -0.22555. This means that when controlling for the other variables, if a team is an 8 seed as opposed to a 1 seed, then they are predicted to have e-0.22555(0.798) times the odds of making the next round of the NCAA tournament. We would expect a 1 seed to move further than an 8th seed. However, we also see some strange trends in terms of seed. If a team is an 12 seed as opposed to a 1 seed, then they are predicted to have e0.38092(1.464) times the odds of making the next round of the NCAA tournament, which seems surprising. 
+
+We also notice how stats such as a higher adjusted offensive efficiency tend to lead to a higher odds of making the next round. The coefficient corresponding to adjusted offensive efficiency is 0.26490. This means that when controlling for the other variables, for a team with one more adjusted offensive efficiency rating point compared to a team without that extra point, the team with the extra point is predicted to have e0.26490(1.303) times the odds of making the next round of the NCAA tournament. In contrast, the negative coefficient for defensive efficiency actually has the opposite effect of offensive efficiency. This contrasts our initial hypothesis that both statistics should be positively correlated with postseason success. 
+
+However, we see that for effective field goal percentage on offense, with a coefficient of 0.245, when controlling for the other variables, for a team with one more offensive effective field goal percentage compared to a team without that extra percent, the team with the extra point is predicted to have e0.245(1.278) times the odds of making the next round of the NCAA tournament.  The negative coefficient for EFG_D implies that when an opposing team has one more offensive effective field goal percentage compared to an opposing team without that extra percent, the team that we are viewing (non-opposing team) playing against the opposing team with the extra point is predicted to have e-0.951(0.386) times the odds of making the next round of the NCAA tournament.
+
+Two of the non-seed statistics that were the greatest predictors of a team that will perform well in the postseason were 2 point defense and 3 point defense. The coefficients of 0.702 and 0.543 were the greatest coefficients among non-seed values, and thus had the greatest predicted multiplicative increase in odds.
+
+It is also interesting to see how WAB, with a coefficient so close to 0, essentially has no effect on the odds of making the next round. This is surprising because WAB is essentially a metric of how many times a team wins during the regular season, which we would expect to be a strong predictor. 
+
+We also used a new test in order to describe the power of our Ordinal Regression Model:
+
+Moderate Explanatory Power: A McFadden's R-squared value of about 0.25 suggests that the model has moderate explanatory power. While it's not particularly high, it's substantial enough to say that the model provides valuable insights into the relationship between the many predictors and postseason outcomes. However, in response to our research questions, this low power value implies that it is difficult to develop an accurate predictive model for champions of the NCAA tournament. 
+
+## Discussion
+
+In answering our research question, we found that seeding is a very influential factor on the postseason results. Of course, we expect this to be the case, as the NCAA committee distributes seeds in such a way that they are essentially predicting how strong a team is. However, we notice that this relationship is not always how we expect it to be. A 3 seed for example is predicted to go further than a 1 seed, and among the lower seeds, they are predicted to be much more successful than we may expect. A few factors may be the reason for such trends: among the higher seeds, there is much more pressure to perform, and as such, they are much more likely to underperform. On the contrary, lower seeds such as the 16 or 15 have very little pressure, which may improve their performance. Additionally, many of these very low seeds are simply from weaker conferences, and thus it is difficult to rate these teams accurately. The difference in strength of schedule due to conference also explains why WAB, or Wins Over Bubble (essentially adjusted wins), is not really effective as a predictor. Some teams in weaker conferences are likely to have a very high win total, or WAB, yet we would still expect them to do worse than teams with less wins but in much more competitive conferences. 
+
+As for statistical predictors, the predictor that was least associated with successful teams was actually BARTHAG, which measures essentially the expected chance of defeating a Division 1 team. The coefficient of -3.737 for BARTHAG means that controlling for the other variables, for a team with one more BARTHAG rating point compared to a team without that extra point, the team with the extra point is predicted to have e-3.737(0.024) times the odds of making the next round of the NCAA tournament. This is very contradictory of what we would expect, as a team that has a higher BARTHAG should theoretically have a higher probability of winning, and thus be correlated with postseason success. We believe this to be an inaccuracy of our data rather than a trend. The very similar values of BARTHAG between many different teams causes it to be a poor predictor. Also, BARTHAG is already meant to be a predictive formula, and thus is likely more valuable as a response variable, rather than a predictor. 
+
+For the statistical values that we expected to be the best predictors of championship success, we found mixed results. While an increase in adjusted offensive efficiency did lead to a prediction of higher odds of going further in the tournament, we found that an increase in adjusted defensive efficiency led to a prediction of lower odds of going further in the tournament. This contrasts what we initially predicted, and it may have to do with the difficulty of separating defensive capability and poor offense from the opposing teams, even with adjustments. We did find that effective field goal efficiency for both offense and defense were meaningful predictors that followed the relationship we would expect. An increase in offensive field goal efficiency predicted higher odds of making it further in the postseason, and an increase in opponent field goal efficiency predicted lower odds of winning in the postseason. However, EFG_O was one of the statistical values most correlated with success, as we initially hypothesized.
+
+The statistical values that were most correlated with success in March Madness were 2 point defense as well as 3 point defense. We did not initially expect this in our hypothesis. However, this follows the well known Bear Bryant quote, “Defense wins championships.” However, it is important to note that this statistic purely describes the opposing team’s field goal percentages in terms of 2 point and 3 point shots. Thus, if the enemy team is simply missing their shots even without great defense, these statistics may be misleading. 
+
+Finally, when responding to the question of if we can really develop a statistical model that can effectively predict champions, the answer is that it is extremely difficult. The nature of March Madness is that it is full of upsets and surprises, and while this results in an exciting offseason, it makes it difficult to develop an effective predictive model. This is why the power we calculated with McFadden’s R-squared value is not as high as we would hope. 
+One difficulty in terms of collecting data is the “garbage time” that occurs at the end of a game. When one team is clearly winning, often starters are subbed out of the game, and players tend to stop playing at their fullest. This skews many of the collected statistics. Additionally, at the end of close games, one strategy to regain possession of the ball is through fouling. Thus, many games end with a large amount of fouls, which is problematic when collecting data around Free Throws. One way to circumvent these issues is to remove data from near the end of games or “garbage time”. Also, it is simply difficult to collect stats on basketball because so much of the results are dependent on how both teams perform on a given day. Perhaps there is a way to look for statistics that are more consistent over time. Lastly, perhaps there is a way to develop a model that reflects how it is more difficult to make it from round 3 to 4 than round 1 to 2. Perhaps this is why many researchers prefer a machine learning approach. 
+
+## Conclusion
+
+In this paper, we develop an ordinal regression model to predict champions of the NCAA basketball postseason. This approach is new from the head-to-head predictions normally seen with statistical models, and is also a simpler approach and more understandable approach compared to machine learning models used previously to predict champions. We find that the statistics of 2 point defense and 3 point defense were most correlative with postseason success, Ultimately we find that it is difficult to predict the postseason results of the March Madness tournament due to its incredible volatility, and while this enhances the fan experience, it means that researchers must continue to explore new models and methods to accurately predict March Madness champions. 
+
+<center> <p>Works Cited</p> </center>
+2024 Pomeroy College Basketball Ratings. (n.d.). https://kenpom.com/
+
+Ginsbach, J. (2023, March 14). 2023 NCAA tournament betting: 68 million Americans to Wager on March madness. Forbes. https://www.forbes.com/sites/jayginsbach/2023/03/12/2023-ncaa-tournament-betting-68-million-americans-to-wager-on-march-madness/?sh=71eeb2542eb2
+
+Kim, J. W., Magnusen, M., & Jeong, S. (2023). March madness prediction: Different machine learning approaches with non‐box score statistics. Managerial and Decision Economics, 44(4), 2223–2236. https://doi.org/10.1002/mde.3814
+
+NCAA.com. (2024, April 29). D1 Men’s Basketball Championship history. https://www.ncaa.com/history/basketball-men/d1
+
+Osken, C., & Onay, C. (2022). Predicting the winning team in basketball: A novel approach. Heliyon, 8(12). https://doi.org/10.1016/j.heliyon.2022.e12189
+
+Shen, G., Gao, D., Wen, Q., & Magel, R. (2016). Predicting results of March madness using three different methods. Journal of Sports Research, 3(1), 10–17. https://doi.org/10.18488/journal.90/2016.3.1/90.1.10.17
+
+Sundberg, A. (2024, March 18). College basketball dataset. Kaggle. https://www.kaggle.com/datasets/andrewsundberg/college-basketball-dataset/data
+Torvik, B. (n.d.). Rank - customizable college basketball tempo free stats - T-rank. T. https://barttorvik.com/# 
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

@@ -1,9 +1,10 @@
 ---
-title: "Stat210 Final Project"
+title: "Developing Ordinal Regression Model to Predict NCAA Basketball Champions"
 author: "Kevin Liu & Evan Zhong"
 format: pdf
 ---
-```{r read-data}
+
+```{r read-data, message = F, echo = F}
 library(tidyverse)
 library(dplyr)
 library(tidymodels)
@@ -17,7 +18,7 @@ cbb <- cbb |> filter(!is.na(POSTSEASON)) |>
 
 ```
 
-```{r, message = F, warning = F}
+```{r, message = F, warning = F, echo = F}
 cbbAug <- cbb |>
   mutate(POSTSEASON = case_when(
     POSTSEASON == "R68" ~ 68,
@@ -42,7 +43,7 @@ cbb <- cbb |>
   ))
 ```
 
-```{r}
+```{r, message = F, echo = F}
 
 cbbOrdinal <- polr(as.factor(POSTSEASON) ~ SEED + G + ADJOE + ADJDE + BARTHAG + EFG_O + EFG_D + TOR + TORD + ORB + DRB + FTR + FTRD + X2P_O + X2P_D + X3P_O + X3P_D + ADJ_T + WAB,  data = cbb)
 summary(cbbOrdinal)
@@ -57,7 +58,7 @@ The coefficient corresponding to adjusted offensive efficiency is 0.26490. This 
 
 
 
-```{r, message = F, warning = F}
+```{r, message = F, warning = F, echo = F}
 
 cbbLinear <- lm(POSTSEASON ~ CONF + G + ADJOE + ADJDE + BARTHAG + EFG_O + EFG_D + TOR + TORD + ORB + DRB + FTR + FTRD + X2P_O + X2P_D + X3P_O + X3P_D + ADJ_T + WAB + SEED, data = cbbAug)
 summary(cbbLinear)
@@ -106,7 +107,7 @@ Alternative Hypothesis, Ha: there is a linear relationship between 2-pt field go
 
 Given that there is no relationship between 2-pt field goal percentage and how far a team makes it in the NCAA tournament, the probability of getting a slope of -5.41850 or less is 0.0187. Taking a 0.05 significance level, since the p-value is smaller than alpha (0.0187<0.05), there is convincing and sufficient evidence that there is a linear relationship between 2-pt field goal percentage and how far a team makes it in the NCAA tournament.
 
-```{r}
+```{r, message = F, echo = F}
 cbbNullModel <- polr(factor(POSTSEASON)~ 1, data = cbb, Hess = TRUE)
 logL_model <- logLik(cbbOrdinal)
 logL_null <- logLik(cbbNullModel)
